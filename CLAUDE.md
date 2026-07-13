@@ -49,9 +49,8 @@ Then open http://localhost:8080
 ### Phase 2 — Planned Calculators
 - [x] dB ratio converter (voltage/power modes, dBµV, dBm, reference table)
 - [x] Voltage divider (forward Vin/R1/R2 → Vout, reverse solve for R2, ratio reference table)
+- [x] Rise time ↔ bandwidth ↔ critical length (environment-aware: air/microstrip/stripline εr, rule-of-thumb notes, typical-signal reference table)
 - [ ] RC filter corner frequency
-- [ ] Rise time ↔ critical length
-- [ ] BW ↔ rise time
 - [ ] Transmission line impedance (microstrip/stripline)
 
 ### Phase 3 — UI/UX enhancements

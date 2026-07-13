@@ -298,7 +298,7 @@ function html() {
           <input class="inp-field" type="text" id="rv-r2" readonly>
           <span class="inp-unit">Ω</span>
         </div>
-        <div class="e24-hint" id="rv-r2-e24"></div>
+        <div class="calc-hint" id="rv-r2-e24"></div>
       </div>
       <div class="fml fml-sm">
         <span class="fml-lbl">Formula</span>

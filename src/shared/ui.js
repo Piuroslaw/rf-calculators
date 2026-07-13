@@ -26,7 +26,7 @@ export function footerHTML() {
 </div>`;
 }
 
-const COMING_SOON = ['Rise time ↔ BW', 'Critical length', 'Propagation delay', 'Skin depth', 'Impedance matching'];
+const COMING_SOON = ['RC filter corner frequency', 'Skin depth', 'Impedance matching'];
 
 export function comingSoonHTML() {
   return `
