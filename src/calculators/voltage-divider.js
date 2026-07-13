@@ -34,6 +34,24 @@ function solveR2({ vin, vout, r1 }) {
   return { r2: vout * r1 / (vin - vout) };
 }
 
+// ── E24 standard resistor values ────────────────────────────────────────────
+const E24_BASE = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0,
+                   3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1];
+
+function nearestE24(value) {
+  if (!isFinite(value) || value <= 0) return undefined;
+  const exp = Math.floor(Math.log10(value));
+  let best, bestDiff = Infinity;
+  for (let e = exp - 1; e <= exp + 1; e++) {
+    for (const b of E24_BASE) {
+      const cand = b * Math.pow(10, e);
+      const diff = Math.abs(Math.log(cand / value));
+      if (diff < bestDiff) { bestDiff = diff; best = cand; }
+    }
+  }
+  return best;
+}
+
 // ── Common divider ratios ───────────────────────────────────────────────────
 const RATIOS = [
   { ratio: 1,   label: '1 : 1 — R2 = R1',   note: '50.0% of Vin' },
@@ -108,6 +126,7 @@ export function init(container) {
 
     if (r2 === undefined) {
       q('#rv-r2').value = '';
+      q('#rv-r2-e24').textContent = '';
       kat(q('#rev-fml'), `R_2=\\dfrac{V_{out}\\cdot R_1}{V_{in}-V_{out}}`);
       return;
     }
@@ -116,6 +135,13 @@ export function init(container) {
     kat(q('#rev-fml'),
       `R_2=\\dfrac{${fmtPlain(vout)}\\cdot ${fmtSI(r1)}\\Omega}{${fmtPlain(vin)}-${fmtPlain(vout)}}=${fmtSI(r2)}\\Omega`
     );
+
+    const std = nearestE24(r2);
+    if (std !== undefined) {
+      const pct = (std - r2) / r2 * 100;
+      const sign = pct >= 0 ? '+' : '';
+      q('#rv-r2-e24').textContent = `Nearest E24 standard value: ${fmtSI(std)}Ω (${sign}${pct.toFixed(1)}%)`;
+    }
   }
 
   // ── Ratio reference table ───────────────────────────────────────────────────
@@ -155,7 +181,7 @@ export function init(container) {
 function html() {
   return `
 <svg style="display:none" aria-hidden="true"><defs>
-  <symbol id="i-divider" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v4"/><rect x="9" y="5" width="6" height="6" rx="1"/><path d="M12 11v2"/><path d="M12 13h7"/><path d="M12 13v2"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M12 21v2"/></symbol>
+  <symbol id="i-divider" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v3"/><rect x="10.8" y="4" width="2.4" height="6" rx="0.6"/><path d="M12 10v3"/><path d="M12 13h7"/><path d="M12 13v3"/><rect x="10.8" y="16" width="2.4" height="6" rx="0.6"/><path d="M12 22v2"/></symbol>
   <symbol id="i-swap"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 5l3 3-3 3M20 16H6M10 13l-3 3 3 3"/></symbol>
   <symbol id="i-cpu"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 7V3M12 7V3M15 7V3M9 17v4M12 17v4M15 17v4M7 9H3M7 12H3M7 15H3M17 9h4M17 12h4M17 15h4"/></symbol>
   <symbol id="i-sun"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l-1.41 1.41"/></symbol>
@@ -271,6 +297,7 @@ function html() {
           <input class="inp-field" type="text" id="rv-r2" readonly>
           <span class="inp-unit">Ω</span>
         </div>
+        <div class="e24-hint" id="rv-r2-e24"></div>
       </div>
       <div class="fml fml-sm">
         <span class="fml-lbl">Formula</span>
@@ -288,9 +315,9 @@ function html() {
         <text class="val" id="sch-vin" x="70" y="19">5V</text>
 
         <path class="wire" d="M60 15v35"/>
-        <rect class="box" x="45" y="50" width="30" height="40" rx="3"/>
+        <rect class="box" x="52" y="50" width="16" height="40" rx="3"/>
         <text class="lbl-desig" x="14" y="73">R1</text>
-        <text class="val" id="sch-r1" x="85" y="73">10kΩ</text>
+        <text class="val" id="sch-r1" x="78" y="73">10kΩ</text>
 
         <path class="wire" d="M60 90v20"/>
         <circle class="dot" cx="60" cy="110" r="2.5"/>
@@ -300,9 +327,9 @@ function html() {
         <text class="val" id="sch-vout" x="155" y="122">2.5V</text>
 
         <path class="wire" d="M60 110v20"/>
-        <rect class="box" x="45" y="130" width="30" height="40" rx="3"/>
+        <rect class="box" x="52" y="130" width="16" height="40" rx="3"/>
         <text class="lbl-desig" x="14" y="153">R2</text>
-        <text class="val" id="sch-r2" x="85" y="153">10kΩ</text>
+        <text class="val" id="sch-r2" x="78" y="153">10kΩ</text>
 
         <path class="wire" d="M60 170v25"/>
         <path class="wire" d="M45 195h30"/>

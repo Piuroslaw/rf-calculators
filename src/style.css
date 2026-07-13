@@ -176,6 +176,8 @@ body {
 .sch-svg .lbl { font-family: var(--sans); font-size: 9px; fill: var(--tx-ter); }
 .sch-svg .val { font-family: var(--mono); font-size: 10px; font-weight: 600; fill: var(--ac-txt); }
 
+.e24-hint { font-size: 11px; font-family: var(--mono); color: var(--ac-txt); margin-top: 6px; }
+
 /* ── Multi-input rows / result grids ── */
 .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(6px,1.5vw,10px); margin-bottom: 1.1rem; }
 @media (max-width: 480px) { .row3 { grid-template-columns: 1fr; } }
