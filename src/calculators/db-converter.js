@@ -1,6 +1,6 @@
 import { fmtSI, splitSI, parseSI, fmtPlain, fmtDB } from '../shared/units.js';
 import { kat } from '../shared/latex.js';
-import { setTheme, badge } from '../shared/ui.js';
+import { setTheme, badge, footerHTML, comingSoonHTML } from '../shared/ui.js';
 
 export const id = 'db-converter';
 export const title = 'dB Converter';
@@ -321,7 +321,6 @@ function html() {
   <symbol id="i-bolt"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L6 13h7l-2 8 9-11h-7z"/></symbol>
   <symbol id="i-pulse"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 5,12 8,5 11,19 14,12 18,12 22,12"/></symbol>
   <symbol id="i-swap"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 5l3 3-3 3M20 16H6M10 13l-3 3 3 3"/></symbol>
-  <symbol id="i-cpu"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 7V3M12 7V3M15 7V3M9 17v4M12 17v4M15 17v4M7 9H3M7 12H3M7 15H3M17 9h4M17 12h4M17 15h4"/></symbol>
   <symbol id="i-sun"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l-1.41 1.41"/></symbol>
   <symbol id="i-moon"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
   <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
@@ -470,22 +469,11 @@ function html() {
         <tbody id="ref-body"></tbody>
       </table>
     </div>
-    <hr class="div">
-    <p class="sec-lbl">Coming soon</p>
-    <div class="cs-row">
-      <span class="cs-pill">Rise time ↔ BW</span>
-      <span class="cs-pill">Critical length</span>
-      <span class="cs-pill">Propagation delay</span>
-      <span class="cs-pill">Skin depth</span>
-      <span class="cs-pill">Impedance matching</span>
-    </div>
+    ${comingSoonHTML()}
   </div>
 
 </div>
 
-<div class="footer">
-  <span class="footer-tag"><span class="ico" style="width:14px;height:14px"><svg><use href="#i-cpu"/></svg></span> RF &amp; Signal Integrity Toolkit</span>
-  <span class="footer-ver">v0.2 · more tools coming</span>
-</div>
+${footerHTML()}
 `;
 }
