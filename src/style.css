@@ -122,6 +122,8 @@ body {
 .inp-field::placeholder { color: var(--tx-ter); font-size: clamp(13px,3vw,18px); }
 .inp-sm { font-size: clamp(15px,3vw,20px) !important; }
 .inp-sm::placeholder { font-size: clamp(11px,2.5vw,14px) !important; }
+.inp-xs { font-size: 12px !important; }
+.inp-xs::placeholder { font-size: 11px !important; }
 .inp-unit { font-size: clamp(11px,1.8vw,14px); color: var(--tx-ter); font-family: var(--mono); white-space: nowrap; flex-shrink: 0; }
 .swap { width: clamp(30px,5vw,40px); height: clamp(30px,5vw,40px); border: 1px solid var(--bd-mid); border-radius: var(--rad-md); background: transparent; color: var(--tx-sec); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-top: clamp(18px,4vw,24px); }
 .swap:hover { background: var(--ac-bg); color: var(--ac-txt); border-color: var(--ac-brd); }
@@ -182,6 +184,8 @@ body {
 /* ── Multi-input rows / result grids ── */
 .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(6px,1.5vw,10px); margin-bottom: 1.1rem; }
 @media (max-width: 480px) { .row3 { grid-template-columns: 1fr; } }
+.row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(6px,1.5vw,10px); margin-bottom: 1.1rem; }
+@media (max-width: 380px) { .row2 { grid-template-columns: 1fr; } }
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 1.25rem; }
 
 /* ── Note / rules-of-thumb box ── */

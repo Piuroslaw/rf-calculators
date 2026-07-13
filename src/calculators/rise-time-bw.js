@@ -11,22 +11,34 @@ export const schema = {
   inputs: [
     { id: 'tr', type: 'number', label: 'Rise time (10–90%)', unit: 's' },
     { id: 'bw', type: 'number', label: 'Bandwidth / knee frequency', unit: 'Hz' },
-    { id: 'er', type: 'number', label: 'Relative permittivity (εr)', unit: '' },
+    { id: 'er', type: 'number', label: 'Relative permittivity (εr, bulk)', unit: '' },
+    { id: 'environment', type: 'select', options: ['air', 'microstrip', 'stripline'], default: 'air' },
   ],
   outputs: [
     { id: 'tr',    label: 'Rise time' },
     { id: 'bw',    label: 'Bandwidth / knee frequency' },
+    { id: 'erEff', label: 'Effective permittivity' },
     { id: 'v',     label: 'Propagation velocity' },
     { id: 'lcrit', label: 'Critical trace length' },
   ],
 };
 
+// Microstrip fields sit partly in air, partly in the dielectric, so velocity
+// depends on an *effective* εr, not the bulk laminate value — this is the
+// simplest geometry-independent approximation (the wide-trace limit of the
+// Hammerstad-Jensen formula). Stripline is fully embedded, so bulk εr applies
+// directly; air is vacuum-like, εr = εeff = 1.
+function effectiveEr(er, environment) {
+  return environment === 'microstrip' ? (er + 1) / 2 : er;
+}
+
 // f = 0.35/Tr is the standard "knee frequency" rule of thumb (Howard Johnson);
 // Lcrit = v*Tr/6 is the "1/6 rule": treat a trace as a transmission line once
 // its one-way delay exceeds Tr/6.
-export function calculate({ tr, bw, er } = {}) {
+export function calculate({ tr, bw, er, environment = 'air' } = {}) {
   if (er === undefined || isNaN(er) || er < 1) return {};
-  const v = C / Math.sqrt(er);
+  const erEff = effectiveEr(er, environment);
+  const v = C / Math.sqrt(erEff);
   let outTr, outBw;
   if (tr !== undefined && !isNaN(tr) && tr > 0) {
     outTr = tr;
@@ -37,22 +49,27 @@ export function calculate({ tr, bw, er } = {}) {
   } else {
     return {};
   }
-  return { tr: outTr, bw: outBw, v, lcrit: v * outTr / 6 };
+  return { tr: outTr, bw: outBw, erEff, v, lcrit: v * outTr / 6 };
 }
 
 const ENVIRONMENTS = {
   air:        { label: 'Air',              er: 1.0 },
-  microstrip: { label: 'Microstrip (PCB)', er: 3.0 },
-  stripline:  { label: 'Stripline (PCB)',  er: 4.3 },
+  microstrip: { label: 'Microstrip (PCB)', er: 4.2 },
+  stripline:  { label: 'Stripline (PCB)',  er: 4.2 },
 };
 
 const SIGNALS = [
   { label: 'TTL / slow CMOS logic',       tr: 5e-9 },
+  { label: '10/100 Ethernet (MII)',       tr: 3e-9 },
   { label: 'Fast CMOS / LVDS clock',      tr: 1e-9 },
+  { label: 'Gigabit Ethernet (GMII)',     tr: 750e-12 },
   { label: 'USB 2.0 Hi-Speed (480Mbps)',  tr: 500e-12 },
+  { label: 'DDR3 (1600MT/s)',             tr: 200e-12 },
   { label: 'PCIe Gen1 (2.5GT/s)',         tr: 100e-12 },
   { label: 'DDR4 (3200MT/s)',             tr: 80e-12 },
+  { label: 'USB 3.0 SuperSpeed (5Gbps)',  tr: 35e-12 },
   { label: 'PCIe Gen4 / 10G SerDes',      tr: 30e-12 },
+  { label: 'USB 3.1 Gen2 (10Gbps)',       tr: 20e-12 },
 ];
 
 const PFX = { T: 1e12, G: 1e9, M: 1e6, k: 1e3, '': 1, m: 1e-3, µ: 1e-6, n: 1e-9, p: 1e-12 };
@@ -118,6 +135,7 @@ export function init(container) {
   // because #tr-in may be showing a collapsed "350" + separate "p" prefix span
   // (via siField.show) with no focus/input event to trust as self-contained.
   let lastTr;
+  let envKey = 'air';
 
   q('#tr-in').addEventListener('input', fromTr);
   q('#tr-in').addEventListener('focus', () => trField.focus());
@@ -140,6 +158,7 @@ export function init(container) {
   }
 
   function setEnv(key) {
+    envKey = key;
     const preset = ENVIRONMENTS[key];
     container.querySelectorAll('[data-env]').forEach(b => b.classList.toggle('active', b.dataset.env === key));
     q('#er-in').value = preset.er;
@@ -151,18 +170,22 @@ export function init(container) {
     if (isNaN(er) || er < 1) {
       q('#v-out').value = '';
       q('#delay-in-out').value = '';
-      kat(q('#v-fml'), `v=\\dfrac{c}{\\sqrt{\\varepsilon_r}}`);
+      q('#ereff-hint').textContent = '';
+      kat(q('#v-fml'), `v=\\dfrac{c}{\\sqrt{\\varepsilon_{r,eff}}}`);
       renderLength({});
       return;
     }
-    const v = C / Math.sqrt(er);
-    q('#v-out').value = fmtSI(v) + 'm/s';
-    q('#delay-in-out').value = fmtSI(0.0254 / v) + 's/in';
-    kat(q('#v-fml'),
-      `v=\\dfrac{c}{\\sqrt{\\varepsilon_r}}=\\dfrac{c}{\\sqrt{${fmtPlain(er)}}}=\\text{${fmtSI(v)}m/s}`
+    const erEff = effectiveEr(er, envKey);
+    const v = C / Math.sqrt(erEff);
+    q('#v-out').value = fmtSI(v);
+    q('#delay-in-out').value = fmtSI(0.0254 / v);
+    q('#ereff-hint').textContent = envKey === 'microstrip' ? `εeff ≈ ${fmtPlain(erEff)}` : '';
+    kat(q('#v-fml'), envKey === 'microstrip'
+      ? `\\varepsilon_{r,eff}=\\dfrac{\\varepsilon_r+1}{2}=\\dfrac{${fmtPlain(er)}+1}{2}=${fmtPlain(erEff)}\\;\\Rightarrow\\;v=\\dfrac{c}{\\sqrt{\\varepsilon_{r,eff}}}=\\text{${fmtSI(v)}m/s}`
+      : `v=\\dfrac{c}{\\sqrt{\\varepsilon_r}}=\\dfrac{c}{\\sqrt{${fmtPlain(er)}}}=\\text{${fmtSI(v)}m/s}`
     );
     if (lastTr !== undefined) {
-      renderLength(calculate({ tr: lastTr, er }));
+      renderLength(calculate({ tr: lastTr, er, environment: envKey }));
     }
   }
 
@@ -178,7 +201,7 @@ export function init(container) {
       renderBwFormula({}); renderLength({});
       return;
     }
-    const out = calculate({ tr, er: currentEr() });
+    const out = calculate({ tr, er: currentEr(), environment: envKey });
     if (out.bw === undefined) {
       lastTr = undefined;
       q('#bw-in').value = ''; q('#bw-unit').textContent = 'Hz';
@@ -201,7 +224,7 @@ export function init(container) {
       renderBwFormula({}); renderLength({});
       return;
     }
-    const out = calculate({ bw, er: currentEr() });
+    const out = calculate({ bw, er: currentEr(), environment: envKey });
     if (out.tr === undefined) {
       lastTr = undefined;
       q('#tr-in').value = ''; q('#tr-unit').textContent = 's';
@@ -241,7 +264,7 @@ export function init(container) {
   // Sets Tr directly from a known raw value (bootstrap, reference-table click)
   // without round-tripping through the (prefix-stripped) DOM field.
   function setTr(trSeconds) {
-    const out = calculate({ tr: trSeconds, er: currentEr() });
+    const out = calculate({ tr: trSeconds, er: currentEr(), environment: envKey });
     if (out.tr === undefined) return;
     lastTr = out.tr;
     trField.show(out.tr);
@@ -300,20 +323,27 @@ function html() {
       <button class="seg-btn" data-env="microstrip">Microstrip <span class="sub">(PCB)</span></button>
       <button class="seg-btn" data-env="stripline">Stripline <span class="sub">(PCB)</span></button>
     </div>
-    <div class="row3">
+    <div class="inp-card" style="margin-bottom:8px">
+      <div class="inp-lbl">Relative permittivity εr</div>
+      <div class="inp-row">
+        <input class="inp-field inp-sm" type="number" step="0.1" id="er-in">
+      </div>
+      <div class="calc-hint" id="ereff-hint"></div>
+    </div>
+    <div class="row2">
       <div class="inp-card">
-        <div class="inp-lbl">Relative permittivity εr</div>
+        <div class="inp-lbl">Velocity</div>
         <div class="inp-row">
-          <input class="inp-field inp-sm" type="number" step="any" id="er-in">
+          <input class="inp-field inp-xs" type="text" id="v-out" readonly>
+          <span class="inp-unit">m/s</span>
         </div>
       </div>
       <div class="inp-card">
-        <div class="inp-lbl">Velocity</div>
-        <input class="inp-field inp-sm" type="text" id="v-out" readonly>
-      </div>
-      <div class="inp-card">
         <div class="inp-lbl">Delay</div>
-        <input class="inp-field inp-sm" type="text" id="delay-in-out" readonly>
+        <div class="inp-row">
+          <input class="inp-field inp-xs" type="text" id="delay-in-out" readonly>
+          <span class="inp-unit">s/in</span>
+        </div>
       </div>
     </div>
     <div class="fml fml-sm">
@@ -368,8 +398,8 @@ function html() {
         <li><b>Knee frequency:</b> f<sub>BW</sub> ≈ 0.35 / T<sub>r</sub> (10–90% rise time) — roughly the highest frequency content that matters for signal integrity.</li>
         <li><b>1/6 rule</b> (Howard Johnson): treat a trace as a transmission line once its one-way delay exceeds T<sub>r</sub>/6 — i.e. length &gt; L<sub>crit</sub>. Some designers use a looser T<sub>r</sub>/4 threshold instead.</li>
         <li><b>Faster edges shrink everything:</b> halving T<sub>r</sub> doubles bandwidth and halves the critical length.</li>
-        <li><b>Microstrip vs stripline:</b> microstrip fields sit partly in air, partly in the dielectric, so use an <i>effective</i> εr (noticeably below the bulk laminate value) — not the bulk FR4 εr. Stripline is fully embedded, so the bulk εr applies directly.</li>
-        <li><b>FR4 sanity check:</b> ≈140–150&nbsp;ps/in in microstrip, ≈170–180&nbsp;ps/in in stripline — handy for eyeballing a critical length without recomputing v by hand.</li>
+        <li><b>Microstrip vs stripline:</b> microstrip fields sit partly in air, partly in the dielectric, so velocity uses an <i>effective</i> εr ≈ (εr + 1)/2 — not the bulk laminate value you type in. This is a geometry-independent approximation; a known trace width/height ratio gives a more precise number. Stripline is fully embedded, so the bulk εr applies directly.</li>
+        <li><b>FR4 sanity check:</b> ≈130–150&nbsp;ps/in in microstrip, ≈170–180&nbsp;ps/in in stripline — handy for eyeballing a critical length without recomputing v by hand.</li>
       </ul>
     </div>
   </div>
