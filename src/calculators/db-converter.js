@@ -1,6 +1,6 @@
 import { fmtSI, splitSI, parseSI, fmtPlain, fmtDB } from '../shared/units.js';
 import { kat } from '../shared/latex.js';
-import { setTheme, badge } from '../shared/ui.js';
+import { setTheme, badge, footerHTML, comingSoonHTML } from '../shared/ui.js';
 
 export const id = 'db-converter';
 export const title = 'dB Converter';
@@ -470,22 +470,11 @@ function html() {
         <tbody id="ref-body"></tbody>
       </table>
     </div>
-    <hr class="div">
-    <p class="sec-lbl">Coming soon</p>
-    <div class="cs-row">
-      <span class="cs-pill">Rise time ↔ BW</span>
-      <span class="cs-pill">Critical length</span>
-      <span class="cs-pill">Propagation delay</span>
-      <span class="cs-pill">Skin depth</span>
-      <span class="cs-pill">Impedance matching</span>
-    </div>
+    ${comingSoonHTML()}
   </div>
 
 </div>
 
-<div class="footer">
-  <span class="footer-tag"><span class="ico" style="width:14px;height:14px"><svg><use href="#i-cpu"/></svg></span> RF &amp; Signal Integrity Toolkit</span>
-  <span class="footer-ver">v0.2 · more tools coming</span>
-</div>
+${footerHTML()}
 `;
 }

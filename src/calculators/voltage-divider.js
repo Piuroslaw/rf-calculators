@@ -1,6 +1,6 @@
 import { fmtSI, splitSI, parseSI, fmtPlain } from '../shared/units.js';
 import { kat } from '../shared/latex.js';
-import { setTheme } from '../shared/ui.js';
+import { setTheme, footerHTML, comingSoonHTML } from '../shared/ui.js';
 
 export const id = 'voltage-divider';
 export const title = 'Voltage Divider';
@@ -351,13 +351,11 @@ function html() {
         <tbody id="ratio-body"></tbody>
       </table>
     </div>
+    ${comingSoonHTML()}
   </div>
 
 </div>
 
-<div class="footer">
-  <span class="footer-tag"><span class="ico" style="width:14px;height:14px"><svg><use href="#i-cpu"/></svg></span> RF &amp; Signal Integrity Toolkit</span>
-  <span class="footer-ver">v0.3 · more tools coming</span>
-</div>
+${footerHTML()}
 `;
 }
