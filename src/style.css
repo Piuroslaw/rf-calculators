@@ -166,6 +166,11 @@ body {
 .b-neg  { background: var(--neg-bg); color: var(--neg-txt); }
 .b-zero { background: var(--bg-ter); color: var(--tx-sec); border: 1px solid var(--bd-lo); }
 
+/* ── Multi-input rows / result grids ── */
+.row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(6px,1.5vw,10px); margin-bottom: 1.1rem; }
+@media (max-width: 480px) { .row3 { grid-template-columns: 1fr; } }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 1.25rem; }
+
 /* ── Coming soon ── */
 .cs-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .cs-pill { font-size: clamp(11px,1.8vw,13px); color: var(--tx-ter); border: 1px dashed var(--bd-mid); border-radius: 20px; padding: 5px 12px; }

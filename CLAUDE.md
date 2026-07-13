@@ -48,7 +48,7 @@ Then open http://localhost:8080
 
 ### Phase 2 — Planned Calculators
 - [x] dB ratio converter (voltage/power modes, dBµV, dBm, reference table)
-- [ ] Voltage divider
+- [x] Voltage divider (forward Vin/R1/R2 → Vout, reverse solve for R2, ratio reference table)
 - [ ] RC filter corner frequency
 - [ ] Rise time ↔ critical length
 - [ ] BW ↔ rise time
