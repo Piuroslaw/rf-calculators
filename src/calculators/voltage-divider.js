@@ -77,6 +77,11 @@ export function init(container) {
     const { vin, r1, r2 } = readForward();
     const out = calculate({ vin, r1, r2 });
 
+    q('#sch-vin').textContent  = isFinite(vin) ? fmtSI(vin) + 'V' : '—';
+    q('#sch-r1').textContent   = isFinite(r1)  ? fmtSI(r1)  + 'Ω' : '—';
+    q('#sch-r2').textContent   = isFinite(r2)  ? fmtSI(r2)  + 'Ω' : '—';
+    q('#sch-vout').textContent = out.vout !== undefined ? fmtSI(out.vout) + 'V' : '—';
+
     if (out.vout === undefined) {
       ['#out-vout', '#out-i', '#out-p1', '#out-p2', '#out-ptot'].forEach(sel => q(sel).value = '');
       kat(q('#fwd-fml'), `V_{out}=V_{in}\\cdot\\dfrac{R_2}{R_1+R_2}`);
@@ -150,7 +155,7 @@ export function init(container) {
 function html() {
   return `
 <svg style="display:none" aria-hidden="true"><defs>
-  <symbol id="i-divider" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><rect x="9" y="6" width="6" height="7" rx="1"/><path d="M12 13v3"/><rect x="9" y="16" width="6" height="6" rx="1"/><path d="M15 9.5h6"/></symbol>
+  <symbol id="i-divider" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v4"/><rect x="9" y="5" width="6" height="6" rx="1"/><path d="M12 11v2"/><path d="M12 13h7"/><path d="M12 13v2"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M12 21v2"/></symbol>
   <symbol id="i-swap"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 5l3 3-3 3M20 16H6M10 13l-3 3 3 3"/></symbol>
   <symbol id="i-cpu"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 7V3M12 7V3M15 7V3M9 17v4M12 17v4M15 17v4M7 9H3M7 12H3M7 15H3M17 9h4M17 12h4M17 15h4"/></symbol>
   <symbol id="i-sun"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l-1.41 1.41"/></symbol>
@@ -275,6 +280,38 @@ function html() {
   </div>
 
   <div class="col-ref">
+    <p class="sec-lbl">Schematic</p>
+    <div class="sch-wrap">
+      <svg class="sch-svg" viewBox="0 0 210 230" xmlns="http://www.w3.org/2000/svg">
+        <circle class="dot" cx="60" cy="15" r="2.5"/>
+        <text class="lbl-desig" x="14" y="19">Vin</text>
+        <text class="val" id="sch-vin" x="70" y="19">5V</text>
+
+        <path class="wire" d="M60 15v35"/>
+        <rect class="box" x="45" y="50" width="30" height="40" rx="3"/>
+        <text class="lbl-desig" x="14" y="73">R1</text>
+        <text class="val" id="sch-r1" x="85" y="73">10kΩ</text>
+
+        <path class="wire" d="M60 90v20"/>
+        <circle class="dot" cx="60" cy="110" r="2.5"/>
+        <path class="wire" d="M60 110h60"/>
+        <circle class="dot" cx="150" cy="110" r="2.5"/>
+        <text class="lbl-desig" x="155" y="106">Vout</text>
+        <text class="val" id="sch-vout" x="155" y="122">2.5V</text>
+
+        <path class="wire" d="M60 110v20"/>
+        <rect class="box" x="45" y="130" width="30" height="40" rx="3"/>
+        <text class="lbl-desig" x="14" y="153">R2</text>
+        <text class="val" id="sch-r2" x="85" y="153">10kΩ</text>
+
+        <path class="wire" d="M60 170v25"/>
+        <path class="wire" d="M45 195h30"/>
+        <path class="wire" d="M50 200h20"/>
+        <path class="wire" d="M55 205h10"/>
+        <text class="lbl" x="70" y="207">GND</text>
+      </svg>
+    </div>
+
     <p class="sec-lbl">Common ratios</p>
     <div class="tbl-wrap">
       <table class="ref-tbl">

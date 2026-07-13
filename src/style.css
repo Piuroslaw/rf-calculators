@@ -166,6 +166,16 @@ body {
 .b-neg  { background: var(--neg-bg); color: var(--neg-txt); }
 .b-zero { background: var(--bg-ter); color: var(--tx-sec); border: 1px solid var(--bd-lo); }
 
+/* ── Schematic diagram ── */
+.sch-wrap { display: flex; justify-content: center; border: 1px solid var(--bd-lo); border-radius: var(--rad-lg); background: var(--bg-sec); padding: 12px; margin-bottom: 1.25rem; }
+.sch-svg { width: 100%; max-width: 210px; height: auto; }
+.sch-svg .wire { stroke: var(--tx-sec); stroke-width: 1.5; fill: none; }
+.sch-svg .box { stroke: var(--ac); stroke-width: 1.5; fill: var(--bg-card); }
+.sch-svg .dot { fill: var(--tx-sec); stroke: none; }
+.sch-svg .lbl-desig { font-family: var(--sans); font-size: 11px; font-weight: 600; fill: var(--tx-pri); }
+.sch-svg .lbl { font-family: var(--sans); font-size: 9px; fill: var(--tx-ter); }
+.sch-svg .val { font-family: var(--mono); font-size: 10px; font-weight: 600; fill: var(--ac-txt); }
+
 /* ── Multi-input rows / result grids ── */
 .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(6px,1.5vw,10px); margin-bottom: 1.1rem; }
 @media (max-width: 480px) { .row3 { grid-template-columns: 1fr; } }
