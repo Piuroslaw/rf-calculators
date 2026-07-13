@@ -21,7 +21,7 @@ export const schema = {
 };
 
 export function calculate({ vin, r1, r2 } = {}) {
-  if ([vin, r1, r2].some(v => v === undefined || isNaN(v)) || r1 + r2 <= 0) return {};
+  if ([vin, r1, r2].some(v => v === undefined || isNaN(v)) || r1 < 0 || r2 < 0 || r1 + r2 <= 0) return {};
   const current = vin / (r1 + r2);
   const vout = vin * r2 / (r1 + r2);
   const p1 = current * current * r1;
@@ -30,7 +30,9 @@ export function calculate({ vin, r1, r2 } = {}) {
 }
 
 function solveR2({ vin, vout, r1 }) {
-  if ([vin, vout, r1].some(v => v === undefined || isNaN(v)) || vin <= vout || vout <= 0) return {};
+  // R1 <= 0 is rejected outright: a negative R1 isn't a real resistor, and R1 = 0
+  // forces Vout = Vin for any R2, which can never satisfy vout < vin below.
+  if ([vin, vout, r1].some(v => v === undefined || isNaN(v)) || r1 <= 0 || vin <= vout || vout <= 0) return {};
   return { r2: vout * r1 / (vin - vout) };
 }
 
@@ -183,7 +185,6 @@ function html() {
 <svg style="display:none" aria-hidden="true"><defs>
   <symbol id="i-divider" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v3"/><rect x="10.8" y="4" width="2.4" height="6" rx="0.6"/><path d="M12 10v3"/><path d="M12 13h7"/><path d="M12 13v3"/><rect x="10.8" y="16" width="2.4" height="6" rx="0.6"/><path d="M12 22v2"/></symbol>
   <symbol id="i-swap"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 5l3 3-3 3M20 16H6M10 13l-3 3 3 3"/></symbol>
-  <symbol id="i-cpu"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 7V3M12 7V3M15 7V3M9 17v4M12 17v4M15 17v4M7 9H3M7 12H3M7 15H3M17 9h4M17 12h4M17 15h4"/></symbol>
   <symbol id="i-sun"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l-1.41 1.41"/></symbol>
   <symbol id="i-moon"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
   <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
